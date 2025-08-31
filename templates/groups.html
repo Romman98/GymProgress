@@ -1,0 +1,37 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Groups</h2>
+
+<h3>Create a new group</h3>
+<form method="post">
+  <label>Group name</label><br>
+  <input name="name" required>
+  <button type="submit">Create</button>
+</form>
+
+<h3>All groups</h3>
+<table border="1" cellpadding="6">
+  <tr><th>Name</th><th>Owner</th><th>Members</th><th>Actions</th></tr>
+  {% for g in all_groups %}
+  <tr>
+    <td><a href="{{ url_for('group_detail', group_id=g.id) }}">{{ g.name }}</a></td>
+    <td>{{ g.owner_id }}</td>
+    <td>{{ g.members|length }}</td>
+    <td>
+      {% if current_user in g.members %}
+        <form method="post" action="{{ url_for('leave_group', group_id=g.id) }}">
+          <button type="submit">Leave</button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ url_for('join_group', group_id=g.id) }}">
+          <button type="submit">Join</button>
+        </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="4">No groups yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,20 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome, {{ current_user.username }}!</h2>
+<p>Your recent progress:</p>
+<table border="1" cellpadding="6">
+  <tr><th>Date</th><th>Exercise</th><th>Weight</th><th>Reps</th><th>Notes</th></tr>
+  {% for p in recent_progress %}
+  <tr>
+    <td>{{ p.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+    <td>{{ p.exercise }}</td>
+    <td>{{ p.weight if p.weight is not none else "" }}</td>
+    <td>{{ p.reps if p.reps is not none else "" }}</td>
+    <td>{{ p.notes }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5">No entries yet. Add your first progress!</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

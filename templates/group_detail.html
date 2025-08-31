@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h2>Group: {{ group.name }}</h2>
+<p>Members ({{ group.members|length }}): 
+  {% for m in group.members %}{{ m.username }}{% if not loop.last %}, {% endif %}{% endfor %}
+</p>
+
+<h3>Recent Progress (all members)</h3>
+<table border="1" cellpadding="6">
+  <tr><th>User</th><th>Date</th><th>Exercise</th><th>Weight</th><th>Reps</th><th>Notes</th></tr>
+  {% for p in member_progress %}
+  <tr>
+    <td>{{ p.user.username }}</td>
+    <td>{{ p.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+    <td>{{ p.exercise }}</td>
+    <td>{{ p.weight if p.weight is not none else "" }}</td>
+    <td>{{ p.reps if p.reps is not none else "" }}</td>
+    <td>{{ p.notes }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6">No progress yet for this group.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}
