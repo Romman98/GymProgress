@@ -78,8 +78,10 @@ resource "aws_default_security_group" "default_sec_group" {
 
 resource "aws_key_pair" "test_ssh_key" {
   key_name   = "testing_ssh_key"
-  public_key = file("ssh_keys/test_rsa.pub")
+  public_key = var.ssh_public_key
 }
+
+variable "ssh_public_key" {}
 
 # Create a EC2 Instance
 resource "aws_instance" "my_vm" {
@@ -103,3 +105,4 @@ resource "aws_instance" "my_vm" {
   }
 
 }
+
