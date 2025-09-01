@@ -179,7 +179,7 @@ def leave_group(group_id):
 
 @app.route('/testing-route/')
 def test_route():
-    return "<h1>New route is working</h1>"
+    return "<h1>New route is working...</h1>"
 
 @app.route('/testing-route/<name>/')
 def test_route2(name):
