@@ -149,3 +149,9 @@ sudo chown -R ec2-user:ec2-user /mnt/gymprogress_data/docker
 # sudo systemctl start docker
 EOF
 }
+
+
+output "ec2_public_ip" {
+  description = "The public IP address of the EC2 instance: "
+  value       = aws_instance.my_vm.public_ip
+}
