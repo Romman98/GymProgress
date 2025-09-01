@@ -104,6 +104,17 @@ resource "aws_instance" "my_vm" {
   }
 }
 
+# ECR Repository to store Docker images
+resource "aws_ecr_repository" "gymprogress" {
+  name = "gymprogress-app"
+}
+
+# ECS Cluster
+resource "aws_ecs_cluster" "gymprogress_cluster" {
+  name = "gymprogress-cluster"
+}
+
+# ECS Task Definition
 resource "aws_ecs_task_definition" "gymprogress" {
   family                   = "gymprogress-task"
   cpu                      = "256"
@@ -113,8 +124,8 @@ resource "aws_ecs_task_definition" "gymprogress" {
 
   container_definitions = jsonencode([
     {
-      name      = "gymprogress"
-      image     = "${aws_ecr_repository.gymprogress.repository_url}:latest"
+      name  = "gymprogress"
+      image = "${aws_ecr_repository.gymprogress.repository_url}:latest" # references the ECR repo
       portMappings = [
         {
           containerPort = 80
@@ -125,10 +136,7 @@ resource "aws_ecs_task_definition" "gymprogress" {
   ])
 }
 
-resource "aws_ecs_cluster" "gymprogress_cluster" {
-  name = "gymprogress-cluster"
-}
-
+# ECS Service
 resource "aws_ecs_service" "gymprogress_service" {
   name            = "gymprogress-service"
   cluster         = aws_ecs_cluster.gymprogress_cluster.id
@@ -141,7 +149,11 @@ resource "aws_ecs_service" "gymprogress_service" {
     security_groups  = [aws_default_security_group.default_sec_group.id]
     assign_public_ip = true
   }
+
+  depends_on = [aws_ecs_task_definition.gymprogress]
 }
+
+
 
 
 
