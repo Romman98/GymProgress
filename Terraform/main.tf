@@ -5,6 +5,13 @@ terraform {
       version = "~> 6.0"
     }
   }
+  backend "s3" {
+    bucket         = "my-terraform-gymprogress-bucket"  # replace with your S3 bucket name
+    key            = "gymprogress/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+  }
+
 }
 
 # Configure the AWS Provider
@@ -82,6 +89,10 @@ resource "aws_key_pair" "gymprogress_ssh_key" {
 }
 variable "ssh_public_key" {}
 
+
+
+
+
 # Create a EC2 Instance
 resource "aws_instance" "my_vm" {
   ami                         = "ami-0de716d6197524dd9"
@@ -96,6 +107,7 @@ resource "aws_instance" "my_vm" {
     "Name" = "My EC2 Instance - Amazon Linux 3"
   }
 }
+
 
 
 
