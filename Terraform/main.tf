@@ -80,6 +80,7 @@ resource "aws_key_pair" "gymprogress_ssh_key" {
   key_name   = "testing_ssh_key"
   public_key = var.ssh_public_key
 }
+variable "ssh_public_key" {}
 
 # Create a EC2 Instance
 resource "aws_instance" "my_vm" {
@@ -95,6 +96,7 @@ resource "aws_instance" "my_vm" {
     "Name" = "My EC2 Instance - Amazon Linux 3"
   }
 }
+
 
 
 
