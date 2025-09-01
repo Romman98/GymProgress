@@ -89,10 +89,6 @@ resource "aws_key_pair" "gymprogress_ssh_key" {
 }
 variable "ssh_public_key" {}
 
-
-
-
-
 # Create a EC2 Instance
 resource "aws_instance" "my_vm" {
   ami                         = "ami-0de716d6197524dd9"
@@ -107,6 +103,46 @@ resource "aws_instance" "my_vm" {
     "Name" = "My EC2 Instance - Amazon Linux 3"
   }
 }
+
+resource "aws_ecs_task_definition" "gymprogress" {
+  family                   = "gymprogress-task"
+  cpu                      = "256"
+  memory                   = "512"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+
+  container_definitions = jsonencode([
+    {
+      name      = "gymprogress"
+      image     = "${aws_ecr_repository.gymprogress.repository_url}:latest"
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+    }
+  ])
+}
+
+resource "aws_ecs_cluster" "gymprogress_cluster" {
+  name = "gymprogress-cluster"
+}
+
+resource "aws_ecs_service" "gymprogress_service" {
+  name            = "gymprogress-service"
+  cluster         = aws_ecs_cluster.gymprogress_cluster.id
+  task_definition = aws_ecs_task_definition.gymprogress.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = [aws_subnet.web.id]
+    security_groups  = [aws_default_security_group.default_sec_group.id]
+    assign_public_ip = true
+  }
+}
+
 
 
 
