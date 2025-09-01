@@ -1,17 +1,17 @@
 name: Build and Push Docker
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+  workflow_run:
+    workflows: ["terraform"]   # runs after terraform workflow
+    types:
+      - completed
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: romman1998/gymprogress  # change this
+      IMAGE_NAME: romman1998/gymprogress
       IMAGE_TAG: latest
 
     steps:
