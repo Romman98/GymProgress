@@ -32,6 +32,12 @@ jobs:
       - name: Terraform Validate
         run: terraform -chdir=Terraform validate
 
+      - name: Terraform Import Key Pair
+        run: terraform -chdir=Terraform import aws_key_pair.gymprogress_ssh_key testing_ssh_key
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
       - name: Terraform Plan
         run: terraform -chdir=Terraform plan -out=tfplan
         env:
