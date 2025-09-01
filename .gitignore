@@ -2,3 +2,4 @@
 instance/
 Terraform/.terraform*
 Terraform/terraform.tfstate*
+venv/
