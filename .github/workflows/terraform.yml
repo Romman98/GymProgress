@@ -2,7 +2,7 @@ name: Terraform CI/CD
 
 on:
   workflow_run:
-    workflows: ["Docker Build & Push"]
+    workflows: ["Build and Push Docker"]
     types:
       - completed
 
