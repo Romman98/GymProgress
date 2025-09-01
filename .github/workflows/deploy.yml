@@ -16,6 +16,14 @@ jobs:
       IMAGE_TAG: latest
 
     steps:
+      - name: Download EC2 IP
+        uses: actions/download-artifact@v3
+        with:
+          name: ec2-ip
+
+      - name: Set EC2 IP variable
+        run: echo "EC2_IP=$(cat ec2_ip.txt)" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -33,4 +41,3 @@ jobs:
             echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
             docker pull $IMAGE_NAME:$IMAGE_TAG
             /home/ec2-user/deploy.sh
-

@@ -6,11 +6,6 @@ on:
     types:
       - completed
 
-outputs:
-  ec2_ip:
-    description: "EC2 Public IP"
-    value: ${{ steps.tf.outputs.ec2_ip }}
-
 jobs:
   terraform:
     name: Terraform
@@ -61,5 +56,11 @@ jobs:
       
       - name: Get Terraform Output
         id: tf
-        run: |
-          echo "ec2_ip=$(terraform -chdir=Terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
+        run: terraform -chdir=Terraform output -raw ec2_public_ip > ec2_ip.txt
+
+      - name: Upload EC2 IP artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ec2-ip
+          path: ec2_ip.txt
+
