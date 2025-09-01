@@ -32,7 +32,7 @@ jobs:
           script: |
             echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
             docker pull $IMAGE_NAME:$IMAGE_TAG
-            docker stop $IMAGE_NAME:$IMAGE_TAG || true
-            docker rm -f $IMAGE_NAME:$IMAGE_TAG || true
+            docker stop $(docker ps -aq) || true
+            docker rm -f $(docker ps -aq) || true
             docker run -d --name gymprogress -p 80:80 $IMAGE_NAME:$IMAGE_TAG
 
