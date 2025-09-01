@@ -122,34 +122,6 @@ resource "aws_instance" "my_vm" {
   }
 }
 
-# EC2 user_data example to mount and prepare the volume
-data "template_file" "user_data" {
-  template = <<EOF
-#!/bin/bash
-# Format the volume if not already
-sudo mkfs -t ext4 /dev/sdf || true
-
-# Create mount point
-sudo mkdir -p /mnt/gymprogress_data
-
-# Mount volume
-sudo mount /dev/sdf /mnt/gymprogress_data
-
-# Add to fstab to mount on reboot
-echo '/dev/sdf /mnt/gymprogress_data ext4 defaults,nofail 0 2' | sudo tee -a /etc/fstab
-
-# Ensure docker data directory exists on volume
-sudo mkdir -p /mnt/gymprogress_data/docker
-sudo chown -R ec2-user:ec2-user /mnt/gymprogress_data/docker
-
-# Optional: configure Docker to use the new path
-# sudo systemctl stop docker
-# sudo sed -i 's|^ExecStart=/usr/bin/dockerd.*|ExecStart=/usr/bin/dockerd -g /mnt/gymprogress_data/docker|' /lib/systemd/system/docker.service
-# sudo systemctl daemon-reload
-# sudo systemctl start docker
-EOF
-}
-
 
 output "ec2_public_ip" {
   description = "The public IP address of the EC2 instance: "
