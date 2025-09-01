@@ -28,6 +28,11 @@ jobs:
 
       - name: Terraform Init
         run: terraform -chdir=Terraform init
+      - name: Terraform destroy
+        run: terraform -chdir=Terraform destroy -out=tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
      
       - name: Terraform Validate
         run: terraform -chdir=Terraform validate
@@ -37,9 +42,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Terraform Import KeyPair
-        run: terraform import aws_key_pair.test_ssh_key testing_ssh_key || true
         
       - name: Terraform Apply
         run: terraform -chdir=Terraform apply -auto-approve tfplan
