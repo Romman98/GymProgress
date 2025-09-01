@@ -180,6 +180,10 @@ def leave_group(group_id):
 @app.route('/testing-route/')
 def test_route():
     return "<h1>New route is working</h1>"
-    
+
+@app.route('/testing-route/<str:name>')
+def test_route(name):
+    return f"<h1>The route is working Mr.{name}</h1>"
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
