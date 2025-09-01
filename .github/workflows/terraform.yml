@@ -56,7 +56,7 @@ jobs:
       
       - name: Get Terraform Output
         id: tf
-        run: terraform -chdir=Terraform output -raw ec2_public_ip > ec2_ip.txt
+        run: terraform output ec2_public_ip > ec2_ip.txt
 
       - name: Upload EC2 IP artifact
         uses: actions/upload-artifact@v4
