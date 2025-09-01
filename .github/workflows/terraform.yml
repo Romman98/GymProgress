@@ -28,6 +28,9 @@ jobs:
 
       - name: Terraform Init
         run: terraform -chdir=Terraform init
+     
+      - name: Terraform Import KeyPair
+        run: terraform import aws_key_pair.test_ssh_key testing_ssh_key || true
         
       - name: Terraform Validate
         run: terraform -chdir=Terraform validate
