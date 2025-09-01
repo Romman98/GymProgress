@@ -177,5 +177,9 @@ def leave_group(group_id):
         flash('You are not a member.')
     return redirect(url_for('groups'))
 
+@app.route('/testing-route/')
+def test_route():
+    return "<h1>New route is working</h1>"
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
