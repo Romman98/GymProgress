@@ -104,6 +104,29 @@ resource "aws_instance" "my_vm" {
   }
 }
 
+# Create an IAM role for ECS tasks
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "gymprogress-ecs-task-execution-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+# Attach the standard ECS execution policy
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_attachment" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+
 # ECR Repository to store Docker images
 resource "aws_ecr_repository" "gymprogress" {
   name = "gymprogress-app"
@@ -122,10 +145,12 @@ resource "aws_ecs_task_definition" "gymprogress" {
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
 
+  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn  # <<<<< add this
+
   container_definitions = jsonencode([
     {
       name  = "gymprogress"
-      image = "${aws_ecr_repository.gymprogress.repository_url}:latest" # references the ECR repo
+      image = "${aws_ecr_repository.gymprogress.repository_url}:latest"
       portMappings = [
         {
           containerPort = 80
@@ -152,6 +177,7 @@ resource "aws_ecs_service" "gymprogress_service" {
 
   depends_on = [aws_ecs_task_definition.gymprogress]
 }
+
 
 
 
