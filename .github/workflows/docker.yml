@@ -1,10 +1,9 @@
 name: Build and Push Docker
 
 on:
-  workflow_run:
-    workflows: ["Terraform CI/CD"]   # runs after terraform workflow
-    types:
-      - completed
+  push:
+    branches:
+      - master  # Trigger on master push
 
 jobs:
   build-and-push:
