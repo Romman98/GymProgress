@@ -76,7 +76,7 @@ resource "aws_default_security_group" "default_sec_group" {
   }
 }
 
-resource "aws_key_pair" "test_ssh_key" {
+resource "aws_key_pair" "gymprogress_ssh_key" {
   key_name   = "testing_ssh_key"
   public_key = var.ssh_public_key
 }
@@ -90,7 +90,7 @@ resource "aws_instance" "my_vm" {
   subnet_id                   = aws_subnet.web.id
   vpc_security_group_ids      = [aws_default_security_group.default_sec_group.id]
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.test_ssh_key.key_name
+  key_name                    = aws_key_pair.gymprogress_ssh_key.key_name
   user_data                   = file("entry-script.sh")
 
   tags = {
@@ -105,4 +105,5 @@ resource "aws_instance" "my_vm" {
   }
 
 }
+
 
