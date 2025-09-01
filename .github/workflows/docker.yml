@@ -29,15 +29,4 @@ jobs:
 
       - name: Push Docker image
         run: docker push $IMAGE_NAME:$IMAGE_TAG
-      - name: Deploy container via SSH
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker pull $IMAGE_NAME:#IMAGE_TAG
-            docker stop $(ps -aq) || true
-            docker rm $(ps -aq) || true
-            docker run -d -p 80:80 --name gymprogress $IMAGE_NAME:#IMAGE_TAG
-      
+  
