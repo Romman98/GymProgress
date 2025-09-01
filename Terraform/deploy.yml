@@ -28,7 +28,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}       # Your private key as GitHub secret
           port: 22
           script: |
-            docker pull ${{secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
-            docker stop gymprogress || true
-            docker rm -f gymprogress || true
-            docker run -d --name gymprogress -p 80:80 ${{secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
+            /home/ec2-user/deploy.sh
