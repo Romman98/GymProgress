@@ -2,7 +2,7 @@ name: Build and Push Docker
 
 on:
   workflow_run:
-    workflows: ["terraform"]   # runs after terraform workflow
+    workflows: ["Terraform CI/CD"]   # runs after terraform workflow
     types:
       - completed
 
