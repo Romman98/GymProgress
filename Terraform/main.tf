@@ -76,11 +76,6 @@ resource "aws_default_security_group" "default_sec_group" {
   }
 }
 
-resource "aws_key_pair" "gymprogress_ssh_key" {
-  key_name   = "testing_ssh_key"
-  public_key = var.ssh_public_key
-}
-
 variable "ssh_public_key" {}
 
 # Create a EC2 Instance
@@ -96,14 +91,7 @@ resource "aws_instance" "my_vm" {
   tags = {
     "Name" = "My EC2 Instance - Amazon Linux 3"
   }
-
-  connection {
-    type        = "ssh"
-    host        = self.public_ip
-    user        = "ec2-user"
-    private_key = file("ssh_keys/test_rsa")
-  }
-
 }
+
 
 
