@@ -1,7 +1,10 @@
 name: Terraform + Deploy
 
-on:
-  workflow_dispatch: # manual trigger, or you can add push triggers
+on: 
+  workflow_run: 
+    workflows: ["Build and Push Docker"] 
+    types: 
+      - completed
 
 jobs:
   terraform:
