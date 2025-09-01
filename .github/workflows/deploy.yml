@@ -1,9 +1,11 @@
 name: Deploy to EC2
 
 on:
-  push:
-    branches:
-      - master  # Trigger on master push
+  workflow_run:
+    workflows: ["Terraform CI/CD"]
+    types:
+      - completed
+
 
 jobs:
   deploy:
