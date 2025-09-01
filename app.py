@@ -182,7 +182,7 @@ def test_route():
     return "<h1>New route is working</h1>"
 
 @app.route('/testing-route/<name>/')
-def test_route(name):
+def test_route2(name):
     return f"<h1>The route is working Mr.{name}!</h1>"
 
 if __name__ == "__main__":
