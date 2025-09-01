@@ -25,7 +25,7 @@ jobs:
       - name: Deploy Docker container on EC2
         uses: appleboy/ssh-action@v0.1.9
         with:
-          host: 52.90.168.25         # Public IP or DNS of your EC2
+          host: ${{env.EC2_IP}}        # Public IP or DNS of your EC2
           username: ec2-user                     # Default user for Amazon Linux
           key: ${{ secrets.SSH_PRIVATE_KEY }}       # Your private key as GitHub secret
           port: 22
