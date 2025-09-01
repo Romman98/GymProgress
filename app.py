@@ -183,7 +183,10 @@ def test_route():
 
 @app.route('/testing-route/<name>/')
 def test_route2(name):
-    return f"<h1>The route is working Mr.{name}!</h1>"
+    if name == "Ahmad":
+        return f"<h1>The route is working Mr.{name}!</h1>"
+    else:
+        return f"<h1>What are you doing here... how did you find me</h1>"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
