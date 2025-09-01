@@ -1,108 +1,102 @@
 name: CI/CD Pipeline
-
-on:
+'on':
   push:
     branches:
       - master
-
 jobs:
   build-and-push:
     name: Build and Push Docker
     runs-on: ubuntu-latest
-
     env:
       IMAGE_NAME: romman1998/gymprogress
       IMAGE_TAG: latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
+          username: '${{ secrets.DOCKER_USERNAME }}'
+          password: '${{ secrets.DOCKER_PASSWORD }}'
       - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
-
+        run: 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
       - name: Push Docker image
-        run: docker push $IMAGE_NAME:$IMAGE_TAG
-
+        run: 'docker push $IMAGE_NAME:$IMAGE_TAG'
   terraform:
-    name: Terraform
     runs-on: ubuntu-latest
-    needs: build-and-push
-
-    env:
-      TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
-
-    outputs:
-      EC2_IP: ${{ steps.get_ip.outputs.ec2_ip }}
-
+    defaults:
+      run:
+        working-directory: Terraform
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.9.8
-
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
       - name: Terraform Init
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          terraform -chdir=Terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=gymprogress/terraform.tfstate" \
-            -backend-config="region=us-east-1" \
-            -backend-config="encrypt=true"
-
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_DEFAULT_REGION: us-east-1
+        run: terraform init
+      - name: Terraform Format
+        run: terraform fmt -check
+      - name: Terraform Validate
+        run: terraform validate
+      - name: Terraform Plan
+        env:
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_DEFAULT_REGION: us-east-1
+        run: terraform plan -out=tfplan
       - name: Terraform Apply
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform -chdir=Terraform apply -auto-approve
-
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_DEFAULT_REGION: us-east-1
+        run: terraform apply -auto-approve tfplan
       - name: Get EC2 IP
         id: get_ip
+        env:
+          AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+          AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+          AWS_DEFAULT_REGION: us-east-1
         run: |
-          EC2_IP=$(terraform -chdir=Terraform output -raw ec2_public_ip | tr -d '\r\n')
-          echo "ec2_ip=$EC2_IP" >> $GITHUB_OUTPUT
-          echo "Terraform EC2 IP: $EC2_IP"
-
+          IP=$(terraform output -raw ec2_public_ip)
+          echo "EC2_IP=$IP" >> $GITHUB_ENV
+          echo "ec2_ip=$IP" >> $GITHUB_OUTPUT
+  use-ip:
+    runs-on: ubuntu-latest
+    needs: terraform
+    steps:
+      - name: Print EC2 IP from Terraform output
+        run: >-
+          echo "Deployed EC2 instance is at ${{ needs.terraform.outputs.ec2_ip
+          }}"
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: terraform
-
     env:
       IMAGE_NAME: romman1998/gymprogress
       IMAGE_TAG: latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
       - name: Show EC2 IP
-        run: echo "EC2 IP is ${{ needs.terraform.outputs.EC2_IP }}"
-
+        run: 'echo "EC2 IP is ${{ needs.terraform.outputs.EC2_IP }}"'
       - name: Install SSH client
         run: sudo apt-get update && sudo apt-get install -y openssh-client
-
       - name: Deploy Docker container on EC2
         uses: appleboy/ssh-action@v0.1.9
         with:
-          host: ${{ needs.terraform.outputs.EC2_IP }}
+          host: '${{ needs.terraform.outputs.EC2_IP }}'
           username: ec2-user
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: '${{ secrets.SSH_PRIVATE_KEY }}'
           port: 22
-          script: |
-            echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          script: >
+            echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{
+            secrets.DOCKER_USERNAME }} --password-stdin
+
             docker pull $IMAGE_NAME:$IMAGE_TAG
+
             /home/ec2-user/deploy.sh
