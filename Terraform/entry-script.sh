@@ -27,6 +27,8 @@ runContainer() {
                 $IMAGE_NAME:$TAG
 }
 
+docker pull "$IMAGE_NAME":"$TAG"
+
 if [[ -n "$CONTAINERS" ]];then
         docker stop "$CONTAINERS"
         docker rm "$CONTAINERS"
