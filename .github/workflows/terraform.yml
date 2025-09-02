@@ -55,3 +55,37 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform -chdir=Terraform apply -auto-approve tfplan
+
+      - name: Get Terraform Output
+        id: get_output
+        run: |
+          IP_ADDRESS=$(terraform output -raw ec2_public_ip)
+          echo "::set-output name=ip::$IP_ADDRESS"
+    outputs:
+        ip: ${{ steps.get_output.outputs.ip }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    
+    env:
+      IMAGE_NAME: romman1998/gymprogress
+      IMAGE_TAG: latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install SSH client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Deploy Docker container on EC2
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ needs.terraform.outputs.ip }}         # Public IP or DNS of your EC2
+          username: ec2-user                     # Default user for Amazon Linux
+          key: ${{ secrets.SSH_PRIVATE_KEY }}       # Your private key as GitHub secret
+          port: 22
+          script: |
+            echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+            docker pull $IMAGE_NAME:$IMAGE_TAG
+            /home/ec2-user/deploy.sh
