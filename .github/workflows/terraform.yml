@@ -78,6 +78,9 @@ jobs:
       - name: Install SSH client
         run: sudo apt-get update && sudo apt-get install -y openssh-client
 
+      - name: Debug IP Address
+        run: echo "IP Address: ${{ needs.terraform.outputs.ip }}"
+
       - name: Deploy Docker container on EC2
         uses: appleboy/ssh-action@v0.1.9
         with:
