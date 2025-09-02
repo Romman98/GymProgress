@@ -61,8 +61,8 @@ jobs:
         run: |
           IP_ADDRESS=$(terraform output -raw ec2_public_ip)
           echo "::set-output name=ip::$IP_ADDRESS"
-    outputs:
-        ip: ${{ steps.get_output.outputs.ip }}
+  outputs:
+      ip: ${{ steps.get_output.outputs.ip }}
 
   deploy:
     runs-on: ubuntu-latest
